@@ -58,29 +58,35 @@ app.get('/shoes', (reg, res) => {
         { name: "Fifty-Inch Heels", price: 175, type: "heel" }
     ];
 
-    let returnData = [];
-
+    // get all acceptable queries
     const min = reg.query.min;
     const max = reg.query.max;
     const type = reg.query.type;
 
-    returnData = shoes;
+    // array of idexes to be removed
+    let idxArray = [];
 
-    if (!min && !max && !type) {
-        returnData = shoes;
-    } else {
-        returnData.forEach((shoe, index) => {
-            if (shoe.price < min) {
-                returnData.splice(index, 1)
-            }
-            if (shoe.price > max) {
-                returnData.splice(index, 1)
-            }
-            if (shoe.type !== type) {
-                returnData.splice(index, 1)
-            }
-        });
-    }
+    shoes.forEach((shoe, index) => {
+        // if query exists and if shoe does not meet criteria, push to idxArray
+        if (type && shoe.type !== type) {
+            idxArray.push(index);
+        } else if (min && max && shoe.price < min && shoe.price > max) {
+            idxArray.push(index);
+        } else if (min && shoe.price < min) {
+            idxArray.push(index);
+        } else if (max && shoe.price > max) {
+            idxArray.push(index);
+        }
+    })
 
-    res.send(returnData);
+    // reverse number of indexes.
+    // The indexes to be deleted will be from highest to lowest, which will prevent shifting the array and deleting incorrect data
+    idxArray = idxArray.reverse();
+
+    idxArray.forEach(idx => {
+        shoes.splice(idx, 1)
+    });
+
+    // return shoes with the request critera
+    res.send(shoes);
 });
